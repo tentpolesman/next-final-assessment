@@ -1,6 +1,21 @@
 import React from 'react'
 import Head from 'next/head'
 import styled from '@emotion/styled';
+import { useQuery, gql } from "@apollo/client";
+import { withApollo } from "../lib/apollo";
+
+const AddToCart = gql`
+    mutation addToCart{
+        addSimpleProductsToCart(input: {
+            cart_id: "Ob4bXrob9ULKYOuw8zd0MyJC2oepWMGy"
+            cart_items: { data: { sku: "24-UG07", quantity: 2 } }
+        }) {
+            cart {
+                id
+            }
+        }
+    }
+`;
 
 const ProductContainer = styled.section`
     max-width: 920px;
@@ -67,6 +82,9 @@ const ProductContainer = styled.section`
 
 const ProductDetail = (props) => {
     const product = props.product;
+    const handleClick = () => {
+        alert(product.name);
+    }
     return (
         <>
             <Head>
@@ -91,12 +109,10 @@ const ProductDetail = (props) => {
                     </div>
                     <h2>SKU#: {product.sku}</h2>
                     <hr />
-                    <div className="product-description">
-                        {product.description.html}
-                    </div>
+                    <div className="product-description" dangerouslySetInnerHTML={{__html: product.description.html}}></div>
                     <hr />
                     <div className="button-container">
-                        <button>Add To Cart</button>
+                        <button onClick={handleClick}>Add To Cart</button>
                     </div>
                 </div>
             </ProductContainer>

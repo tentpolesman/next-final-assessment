@@ -5,6 +5,7 @@ import { withApollo } from "../lib/apollo";
 
 
 import CategoryList from '../components/CategoryList'
+import Loading from '../components/Loading'
 
 const CATEGORY_LIST = gql`
   query Category {
@@ -21,11 +22,11 @@ const Index = () => {
 
   const { loading, error, data } = useQuery(CATEGORY_LIST, {
     variables: {},
-    // fetchPolicy: 'no-cache'
+    fetchPolicy: 'no-cache'
   });
 
   if (loading) {
-    return <div>loading...</div>;
+    return <Loading />;
   }
 
   const category = data.categoryList;

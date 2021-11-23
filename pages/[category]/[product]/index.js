@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import { useQuery, gql } from "@apollo/client";
 import { withApollo } from "../../../lib/apollo";
 import ProductDetail from '../../../components/ProductDetail';
+import Loading from '../../../components/Loading'
 
 const PRODUCT_DETAIL = gql`
     query Product($url_key: String) {
@@ -32,11 +33,11 @@ const index = () => {
     const router = useRouter();
     const { loading, error, data } = useQuery(PRODUCT_DETAIL, {
       variables: { url_key: router.query.product },
-      // fetchPolicy: 'no-cache'
+      fetchPolicy: 'no-cache'
     });
   
     if (loading) {
-      return <div>loading...</div>;
+        return <Loading />;
     }
   
     const product = data.products;
