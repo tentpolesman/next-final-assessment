@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useEffect, useState, useContext } from 'react';
 import Head from 'next/head'
 import styled from '@emotion/styled';
-import { useQuery, gql } from "@apollo/client";
+import { useQuery, useMutation, gql } from "@apollo/client";
 import { withApollo } from "../../lib/apollo";
 import Loading from '../Loading';
+import { AppContext } from '../../context/AppContext'
 
 // Styling CSS in JS
 const ProductContainer = styled.section`
@@ -101,20 +102,38 @@ const PRODUCT_DETAIL = gql`
 `;
 // End 
 
+// Create Empty Cart Mutation 
+const CREATE_EMPTY_CART = gql`
+    mutation GenerateToken {
+        createEmptyCart
+    } 
+`;
+// End 
+
 const ProductDetail = (props) => {
     const params_key = props.resolver.canonical_url.replace(".html", "");
-    const { loading, error, data } = useQuery(PRODUCT_DETAIL, {
+    const { loading: loadingProductDetail, error: errorProductDetail, data: dataProductDetail } = useQuery(PRODUCT_DETAIL, {
         variables: { url_key: params_key },
         fetchPolicy: 'no-cache'
-      });
+    });
     
-      if (loading) {
-          return <Loading />;
-      }
+    if (loadingProductDetail) {
+        return <Loading />;
+    }
     
-    const product = data.products.items[0];
+    const product = dataProductDetail.products.items[0];
+
+    const [cartId, setCartId] = useContext(AppContext);
+
+    // const [generateToken] = useMutation(CREATE_EMPTY_CART);
+
     const handleClick = () => {
-        alert(product.name);
+        if(cartId === "") {
+            // const {data: {createEmptyCart}} = generateToken();
+            // console.log(createEmptyCart);
+            setCartId("Ob4bXrob9ULKYOuw8zd0MyJC2oepWMGy");
+        }
+        console.log(cartId);
     }
     return (
         <>

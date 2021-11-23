@@ -28,7 +28,7 @@ const getPage = (resolver) => {
         return <ProductDetail resolver={resolver} />
     }
     return <span />;
-  };
+};
 
 function DynamicPage({slug}) {
     // const { query } = slug;
@@ -38,8 +38,8 @@ function DynamicPage({slug}) {
         value = value.replace(".html", "");
         NewSlug.push(value);//masukin value kedalam array slugnya
         url += `/${value}`;
-      });
-      url += ".html";
+    });
+    url += ".html";
     // console.log("url",NewSlug)
 
     const response = useQuery(UrlResolver,{

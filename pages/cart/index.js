@@ -1,55 +1,72 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
+import Head from 'next/head'
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { DataGrid } from '@mui/x-data-grid';
+import { AppContext } from '../../context/AppContext'
+import { useQuery, gql } from "@apollo/client";
+import { withApollo } from "../../lib/apollo";
 
-const columns = [
-    { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'firstName', headerName: 'First name', width: 130 },
-    { field: 'lastName', headerName: 'Last name', width: 130 },
-    {
-      field: 'age',
-      headerName: 'Age',
-      type: 'number',
-      width: 90,
-    },
-    {
-      field: 'fullName',
-      headerName: 'Full name',
-      description: 'This column has a value getter and is not sortable.',
-      sortable: false,
-      width: 160,
-      valueGetter: (params) =>
-        `${params.getValue(params.id, 'firstName') || ''} ${
-          params.getValue(params.id, 'lastName') || ''
-        }`,
-    },
-];
-  
-const rows = [
-    { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-    { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-    { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-    { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-    { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
-    { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
-    { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-    { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-    { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-];
+
+
+// Get Cart Query 
+const GET_CART = gql`
+    query getCart($cart_id: String!){
+        cart(cart_id: $cart_id){
+        errorItems
+        id
+        items {
+            prices {
+            price {
+                value
+            }
+            }
+            quantity
+            product {
+            name
+            }
+        }
+        total_quantity
+        }
+    } 
+`;
+// End 
 
 const index = () => {
-    const [cartId, setCartId] = useState("");
 
-    useEffect(() => {
-        const localCartId = JSON.parse(localStorage.getItem('swiftCartId'))
-        if(localCartId) {
-            setCartId(localCartId);
-        }
-    }, []);
+    const [cartId, setCartId] = useContext(AppContext);
+
+    const { loading: loadingCart, error: errorCart, data: dataCart } = useQuery(GET_CART, {
+        variables: { cart_id: cartId },
+        fetchPolicy: 'no-cache'
+    });
+
+    const rowsTable = [];
+
+    if(dataCart) {
+        const cartDetail = dataCart.cart;
+        // console.log(cartDetail);
+        cartDetail && cartDetail.items.map((item, index) => {
+            rowsTable = [...rowsTable, {id: index+1, productName: item.product.name, productQty: item.quantity, productPrice: item.prices.price.value}]
+        });
+        console.log(rowsTable);
+    }
+
+    const columns = [
+        { field: 'id', headerName: 'ID', width: 70 },
+        { field: 'productName', headerName: 'Name', width: 130 },
+        { field: 'productQty', headerName: 'Quantity', width: 130 },
+        { field: 'productPrice', headerName: 'Price', width: 130 },
+    ];
+      
+    const rows = rowsTable;
 
     return (
         <>
+            <Head>
+                <title>Cart Page</title>
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
             <Box sx={{ flexGrow: 1, padding: "24px" }}>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
@@ -68,5 +85,4 @@ const index = () => {
         </>
     )
 }
-
-export default index
+export default withApollo({ ssr: true })(index);

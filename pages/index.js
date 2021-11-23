@@ -46,7 +46,7 @@ const Index = () => {
       <main className={styles.main}>
         <div className={styles.grid}>
           {category && category.map((ctg, index) => 
-            <CategoryList ctg={ctg} />
+            <CategoryList ctg={ctg} key={index} />
           )}
         </div>
       </main>
