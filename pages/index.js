@@ -4,16 +4,23 @@ import { useQuery, gql } from "@apollo/client";
 import { withApollo } from "../lib/apollo";
 
 
-import CategoryList from '../components/CategoryList'
+import CategoryList from '../components/category/CategoryList'
 import Loading from '../components/Loading'
 
 const CATEGORY_LIST = gql`
   query Category {
-    categoryList(filters: {}) {
-      id
-      name
-      image
+    categoryList {
       url_key
+      name
+      children {
+          products {
+            items {
+              name
+            }
+          }
+          url_key
+          name
+      }
     }
   }
 `;
@@ -29,8 +36,7 @@ const Index = () => {
     return <Loading />;
   }
 
-  const category = data.categoryList;
-
+  const category = data.categoryList[0].children;
   return (
     <div className={styles.container}>
       <Head>

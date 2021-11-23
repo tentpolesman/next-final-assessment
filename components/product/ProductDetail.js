@@ -2,21 +2,10 @@ import React from 'react'
 import Head from 'next/head'
 import styled from '@emotion/styled';
 import { useQuery, gql } from "@apollo/client";
-import { withApollo } from "../lib/apollo";
+import { withApollo } from "../../lib/apollo";
+import Loading from '../Loading';
 
-const AddToCart = gql`
-    mutation addToCart{
-        addSimpleProductsToCart(input: {
-            cart_id: "Ob4bXrob9ULKYOuw8zd0MyJC2oepWMGy"
-            cart_items: { data: { sku: "24-UG07", quantity: 2 } }
-        }) {
-            cart {
-                id
-            }
-        }
-    }
-`;
-
+// Styling CSS in JS
 const ProductContainer = styled.section`
     max-width: 920px;
     border-radius: 12px;
@@ -79,9 +68,51 @@ const ProductContainer = styled.section`
         }
     }
 `;
+// End 
+
+// Product Detail Query 
+const PRODUCT_DETAIL = gql`
+    query Product($url_key: String) {
+        products(filter: { url_key: { eq: $url_key } }) {
+            items {
+                url_key
+                name
+                description {
+                    html
+                }
+                image {
+                    url
+                }
+                sku 
+                stock_status
+                media_gallery {
+                  url
+                }
+                price_range {
+                    minimum_price {
+                        regular_price {
+                            value
+                        }
+                    }
+                }
+            }
+        }
+    }
+`;
+// End 
 
 const ProductDetail = (props) => {
-    const product = props.product;
+    const params_key = props.resolver.canonical_url.replace(".html", "");
+    const { loading, error, data } = useQuery(PRODUCT_DETAIL, {
+        variables: { url_key: params_key },
+        fetchPolicy: 'no-cache'
+      });
+    
+      if (loading) {
+          return <Loading />;
+      }
+    
+    const product = data.products.items[0];
     const handleClick = () => {
         alert(product.name);
     }
@@ -104,10 +135,10 @@ const ProductDetail = (props) => {
                 </div>
                 <div className="product-info">
                     <div className="product-status">
-                        <h1>{product.name}</h1>
+                        <h1 dangerouslySetInnerHTML={{__html: product.name}}></h1>
                         <p><strong>{product.stock_status}</strong></p>
                     </div>
-                    <h2>SKU#: {product.sku}</h2>
+                    <h2>Rp{product.price_range.minimum_price.regular_price.value}&nbsp;&nbsp;|&nbsp;&nbsp;SKU#: {product.sku}</h2>
                     <hr />
                     <div className="product-description" dangerouslySetInnerHTML={{__html: product.description.html}}></div>
                     <hr />
@@ -119,5 +150,4 @@ const ProductDetail = (props) => {
         </>
     )
 }
-
-export default ProductDetail
+export default withApollo({ ssr: true })(ProductDetail);
