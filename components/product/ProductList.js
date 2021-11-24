@@ -54,7 +54,7 @@ const ProductList = (props) => {
                 <Link key={index} href="/[...slug]" as={`/${product.url_key}.html`}>
                   <div className={styles.card}>
                     <img src={product.image.url} style={{ width: "100%" }} alt="image"/>
-                    <h2>{product.name}</h2>
+                    <h2 dangerouslySetInnerHTML={{__html: product.name}}></h2>
                   </div>
                 </Link>
               )}

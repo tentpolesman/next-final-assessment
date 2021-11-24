@@ -202,7 +202,7 @@ const ProductDetail = (props) => {
                     <div className="product-description" dangerouslySetInnerHTML={{__html: product.description.html}}></div>
                     <hr />
                     <div className="button-container">
-                        <button onClick={()=> handleClick(product.sku)}>Add To Cart</button>
+                        <button onClick={()=> handleClick(product.sku)}>Add To Cart (Simple & Downloadable Only)</button>
                     </div>
                 </div>
             </ProductContainer>
