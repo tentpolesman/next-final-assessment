@@ -155,6 +155,14 @@ const ProductDetail = (props) => {
         if(!cartId) {
             const {data: {createEmptyCart}} = await generateToken();
             setCartId(createEmptyCart);
+            const cartData = await addProductToCart({
+                variables: {
+                    cart_id: createEmptyCart,
+                    sku,
+                    quantity: 1
+                }
+            });
+            cartData ? alert("Berhasil") : alert("Gagal");
         }
         if(cartId) {
             const cartData = await addProductToCart({
