@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import Head from 'next/head'
 import styled from '@emotion/styled';
 import { useMutation, useQuery, gql } from "@apollo/client";
@@ -55,17 +55,34 @@ const ProductContainer = styled.section`
     .product-description {
         padding: 2px 0 4px 0;
     }
-    .button-container {
-        button {
+    button {
+        margin-top: 6px;
+        padding: 12px 16px;
+        text-transform: uppercase;
+        font-weight: bold;
+        color: #fff;
+        background: #000;
+        border: 0;
+        outline: 0;
+        cursor: pointer;
+    }
+    .qty-counter {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        input {
             margin-top: 6px;
-            padding: 12px 16px;
-            text-transform: uppercase;
-            font-weight: bold;
-            color: #fff;
-            background: #000;
-            border: 0;
-            outline: 0;
-            cursor: pointer;
+            padding: 10px 16px;
+            width: 55px;
+            -moz-appearance: textfield;
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        & > * + * {
+            margin-left: 12px;
         }
     }
 `;
@@ -136,13 +153,14 @@ const ADD_PRODUCT_TO_CART = gql`
 const ProductDetail = (props) => {
 
     const [cartId, setCartId] = useContext(AppContext);
+    const [qtyCounter, setQtyCounter] = useState(1);
     const [generateToken] = useMutation(CREATE_EMPTY_CART);
     const [addProductToCart] = useMutation(ADD_PRODUCT_TO_CART);
 
     const params_key = props.resolver.canonical_url.replace(".html", "");
     const { loading: loadingProductDetail, error: errorProductDetail, data: dataProductDetail } = useQuery(PRODUCT_DETAIL, {
         variables: { url_key: params_key },
-        fetchPolicy: 'no-cache'
+        fetchPolicy: 'network-only'
     });
     
     if (loadingProductDetail) {
@@ -159,7 +177,7 @@ const ProductDetail = (props) => {
                 variables: {
                     cart_id: createEmptyCart,
                     sku,
-                    quantity: 1
+                    quantity: qtyCounter
                 }
             });
             cartData ? alert("Berhasil") : alert("Gagal");
@@ -169,7 +187,7 @@ const ProductDetail = (props) => {
                 variables: {
                     cart_id: cartId,
                     sku,
-                    quantity: 1
+                    quantity: qtyCounter
                 }
             });
             cartData ? alert("Berhasil") : alert("Gagal");
@@ -201,7 +219,10 @@ const ProductDetail = (props) => {
                     <hr />
                     <div className="product-description" dangerouslySetInnerHTML={{__html: product.description.html}}></div>
                     <hr />
-                    <div className="button-container">
+                    <div className="qty-counter">
+                        <button onClick={()=> qtyCounter > 1 ? setQtyCounter(qtyCounter - 1) : setQtyCounter(1)}>-</button>
+                        <input disabled min="1" type="number" value={qtyCounter} />
+                        <button onClick={()=> setQtyCounter(qtyCounter + 1)}>+</button>
                         <button onClick={()=> handleClick(product.sku)}>Add To Cart (Simple & Downloadable Only)</button>
                     </div>
                 </div>
