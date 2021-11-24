@@ -38,7 +38,7 @@ const index = () => {
 
     const { loading: loadingCart, error: errorCart, data: dataCart } = useQuery(GET_CART, {
         variables: { cart_id: cartId },
-        fetchPolicy: 'no-cache'
+        fetchPolicy: 'network-only'
     });
 
     const rowsTable = [];

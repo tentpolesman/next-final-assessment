@@ -4,7 +4,7 @@ export const AppContext = createContext();
 
 export const AppProvider = (props) => {
 
-    const [cartId, setCartId] = useState("");
+    const [cartId, setCartId] = useState(null);
 
     useEffect(() => {
         const localCartId = JSON.parse(localStorage.getItem('metalslug'))

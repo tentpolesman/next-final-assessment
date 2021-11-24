@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useContext } from 'react';
 import Head from 'next/head'
 import styled from '@emotion/styled';
-import { useQuery, useMutation, gql } from "@apollo/client";
+import { useMutation, useQuery, gql } from "@apollo/client";
 import { withApollo } from "../../lib/apollo";
 import Loading from '../Loading';
 import { AppContext } from '../../context/AppContext'
@@ -110,7 +110,35 @@ const CREATE_EMPTY_CART = gql`
 `;
 // End 
 
+// Add Product To Cart Mutation
+const ADD_PRODUCT_TO_CART = gql`
+    mutation AddProductToCart($cart_id: String!, $sku: String!, $quantity: Float!) {
+        addSimpleProductsToCart(
+            input: {
+                cart_id: $cart_id
+                cart_items: {
+                    data: {
+                        sku: $sku
+                        quantity: $quantity
+                    }
+                }
+            }
+        ) {
+            cart {
+                id        
+            }
+        }
+    }
+
+`
+// End 
+
 const ProductDetail = (props) => {
+
+    const [cartId, setCartId] = useContext(AppContext);
+    const [generateToken] = useMutation(CREATE_EMPTY_CART);
+    const [addProductToCart] = useMutation(ADD_PRODUCT_TO_CART);
+
     const params_key = props.resolver.canonical_url.replace(".html", "");
     const { loading: loadingProductDetail, error: errorProductDetail, data: dataProductDetail } = useQuery(PRODUCT_DETAIL, {
         variables: { url_key: params_key },
@@ -123,17 +151,21 @@ const ProductDetail = (props) => {
     
     const product = dataProductDetail.products.items[0];
 
-    const [cartId, setCartId] = useContext(AppContext);
-
-    // const [generateToken] = useMutation(CREATE_EMPTY_CART);
-
-    const handleClick = () => {
-        if(cartId === "") {
-            // const {data: {createEmptyCart}} = generateToken();
-            // console.log(createEmptyCart);
-            setCartId("Ob4bXrob9ULKYOuw8zd0MyJC2oepWMGy");
+    const handleClick = async (sku) => {
+        if(!cartId) {
+            const {data: {createEmptyCart}} = await generateToken();
+            setCartId(createEmptyCart);
         }
-        console.log(cartId);
+        if(cartId) {
+            const cartData = await addProductToCart({
+                variables: {
+                    cart_id: cartId,
+                    sku,
+                    quantity: 1
+                }
+            });
+            cartData ? alert("Berhasil") : alert("Gagal");
+        }
     }
     return (
         <>
@@ -162,7 +194,7 @@ const ProductDetail = (props) => {
                     <div className="product-description" dangerouslySetInnerHTML={{__html: product.description.html}}></div>
                     <hr />
                     <div className="button-container">
-                        <button onClick={handleClick}>Add To Cart</button>
+                        <button onClick={()=> handleClick(product.sku)}>Add To Cart</button>
                     </div>
                 </div>
             </ProductContainer>
